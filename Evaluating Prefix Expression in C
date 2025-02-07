@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+// Function to check if the character is an operator
+int isOperator(char c) {
+    return (c == '+' || c == '-' || c == '*' || c == '/');
+}
+
+// Recursive function to evaluate prefix expression
+int evaluatePrefix(char* expr[], int* index) {
+    char* token = expr[*index];
+    (*index)++;
+
+    // If token is an operator, evaluate recursively
+    if (isOperator(token[0]) && strlen(token) == 1) {
+        int op1 = evaluatePrefix(expr, index);
+        int op2 = evaluatePrefix(expr, index);
+        switch (token[0]) {
+            case '+': return op1 + op2;
+            case '-': return op1 - op2;
+            case '*': return op1 * op2;
+            case '/': return op1 / op2;
+        }
+    }
+    // If token is a number, return its integer value
+    return atoi(token);
+}
+
+int main() {
+    char* expr[] = { "+", "*", "5", "6", "7" }; // Equivalent to (5 * 6) + 7
+    int index = 0;
+    int result = evaluatePrefix(expr, &index);
+    printf("Result: %d\n", result);
+    return 0;
+}

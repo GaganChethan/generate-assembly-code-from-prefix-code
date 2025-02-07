@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to generate assembly for prefix expression
+void generateAssembly(char* expr[], int* index) {
+    char* token = expr[*index];
+    (*index)++;
+
+    // If token is an operator, process recursively
+    if (strlen(token) == 1 && (token[0] == '+' || token[0] == '-' || token[0] == '*' || token[0] == '/')) {
+        generateAssembly(expr, index);  // Left operand
+        generateAssembly(expr, index);  // Right operand
+        printf("POP EBX\n"); // Second operand
+        printf("POP EAX\n"); // First operand
+
+        // Generate appropriate assembly operation
+        switch (token[0]) {
+            case '+': printf("ADD EAX, EBX\n"); break;
+            case '-': printf("SUB EAX, EBX\n"); break;
+            case '*': printf("IMUL EAX, EBX\n"); break;
+            case '/': printf("DIV EBX\n"); break;
+        }
+        printf("PUSH EAX\n"); // Store result
+    } else {
+        // If operand, push to stack
+        printf("MOV EAX, %s\n", token);
+        printf("PUSH EAX\n");
+    }
+}
+
+int main() {
+    char* expr[] = { "+", "*", "5", "6", "7" }; // Equivalent to (5 * 6) + 7
+    int index = 0;
+    printf("section .text\n");
+    printf("global _start\n\n");
+    printf("_start:\n");
+    generateAssembly(expr, &index);
+    printf("POP EAX\n"); // Final result
+    printf("MOV EBX, 0\n"); // Exit code
+    printf("MOV EAX, 1\n"); // sys_exit
+    printf("INT 0x80\n");
+    return 0;
+}
